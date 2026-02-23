@@ -1,0 +1,32 @@
+services:
+  flask:
+    build: .
+    container_name: flask-app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  apache:
+    build: ./apache
+    container_name: apache
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./apache/httpd-vhosts-active.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
+      - /home/ubuntu/factsorlie/.well-known:/usr/local/apache2/htdocs/.well-known
+      - /etc/letsencrypt:/etc/letsencrypt
+    depends_on:
+      - flask
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"

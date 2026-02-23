@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Submit{% endblock %}
+
+{% block content %}
+    <h1>Submit a Fact or a Lie</h1>
+
+    {% if message %}
+        <p class="message">{{ message }}</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('submit') }}">
+        <label for="statement">Your statement:</label>
+        <textarea id="statement" name="statement" rows="4" required></textarea>
+
+        <label for="category">Is it a fact or a lie?</label>
+        <select id="category" name="category" required>
+            <option value="" disabled selected>Select one</option>
+            <option value="fact">Fact</option>
+            <option value="lie">Lie</option>
+        </select>
+
+        <button type="submit">Submit</button>
+    </form>
+{% endblock %}
