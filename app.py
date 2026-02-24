@@ -27,9 +27,9 @@ def index():
     return render_template("index.html", count=count, readme_html=readme_html)
 
 
-def is_rate_limited(ip, limit=3, window=60):
+def is_rate_limited(ip, endpoint="default", limit=3, window=60):
     """Check if IP has exceeded limit requests within window seconds."""
-    key = f"ratelimit:submit:{ip}"
+    key = f"ratelimit:{endpoint}:{ip}"
     count = r.get(key)
     if count and int(count) >= limit:
         return True
@@ -45,7 +45,7 @@ def submit():
     message = None
     analysis = None
     if request.method == "POST":
-        if is_rate_limited(request.remote_addr):
+        if is_rate_limited(request.remote_addr, endpoint="submit", limit=3):
             message = "Rate limit exceeded. Please wait a minute before trying again."
             return render_template("submit.html", message=message, analysis=analysis)
         statement = request.form.get("statement", "").strip()
@@ -140,6 +140,9 @@ def analyze_statement(title, video_meta=None):
 
 @app.route("/query", methods=["POST"])
 def query():
+    if is_rate_limited(request.remote_addr, endpoint="query", limit=12):
+        return jsonify({"error": "Rate limit exceeded. Please wait a minute."}), 429
+
     data = request.get_json(silent=True)
     if not data or not data.get("title"):
         return jsonify({"error": "Missing required field: title"}), 400

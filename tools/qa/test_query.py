@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, PropertyMock
 from app import app
 
 
@@ -93,3 +93,12 @@ def test_query_no_api_key(client):
     response = client.post("/query", json={"title": "Some title here for testing"})
     assert response.status_code == 500
     assert "not configured" in response.get_json()["error"]
+
+
+@patch("app.r")
+def test_query_rate_limit(mock_redis, client):
+    mock_redis.get.return_value = b"12"
+
+    response = client.post("/query", json={"title": "Some test title here"})
+    assert response.status_code == 429
+    assert "Rate limit" in response.get_json()["error"]
