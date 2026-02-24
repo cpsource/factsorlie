@@ -27,16 +27,18 @@ def test_submit_get(client):
     assert b"Your statement" in response.data
 
 
-def test_submit_empty_statement(client):
+@patch("app.verify_turnstile", return_value=True)
+def test_submit_empty_statement(mock_turnstile, client):
     response = client.post("/submit", data={"statement": ""})
     assert response.status_code == 200
     assert b"Please enter a statement" in response.data
 
 
+@patch("app.verify_turnstile", return_value=True)
 @patch("app.http_requests.post")
 @patch("app.r")
 @patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-ant-test-key"})
-def test_submit_analyzes_statement(mock_redis, mock_post, client):
+def test_submit_analyzes_statement(mock_redis, mock_post, mock_turnstile, client):
     mock_resp = MagicMock()
     mock_resp.status_code = 200
     mock_resp.raise_for_status = MagicMock()
@@ -63,10 +65,11 @@ def test_submit_analyzes_statement(mock_redis, mock_post, client):
     assert "The earth is flat" in user_msg
 
 
+@patch("app.verify_turnstile", return_value=True)
 @patch("app.http_requests.post")
 @patch("app.r")
 @patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-ant-test-key"})
-def test_submit_shows_error_on_api_failure(mock_redis, mock_post, client):
+def test_submit_shows_error_on_api_failure(mock_redis, mock_post, mock_turnstile, client):
     mock_post.side_effect = requests.RequestException("Connection refused")
 
     response = client.post("/submit", data={"statement": "The earth is flat"})
@@ -74,8 +77,17 @@ def test_submit_shows_error_on_api_failure(mock_redis, mock_post, client):
     assert b"Analysis error" in response.data
 
 
+# TODO: Re-enable once Cloudflare Turnstile widget is configured for factsorlie.com
+# @patch("app.verify_turnstile", return_value=False)
+# def test_submit_captcha_failure(mock_turnstile, client):
+#     response = client.post("/submit", data={"statement": "The earth is flat"})
+#     assert response.status_code == 200
+#     assert b"Bot verification failed" in response.data
+
+
+@patch("app.verify_turnstile", return_value=True)
 @patch("app.r")
-def test_submit_rate_limit(mock_redis, client):
+def test_submit_rate_limit(mock_redis, mock_turnstile, client):
     # Simulate rate limit exceeded: r.get returns "3"
     mock_redis.get.return_value = b"3"
 
@@ -87,10 +99,11 @@ def test_submit_rate_limit(mock_redis, client):
     mock_redis.lpush.assert_not_called()
 
 
+@patch("app.verify_turnstile", return_value=True)
 @patch("app.http_requests.post")
 @patch("app.r")
 @patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-ant-test-key"})
-def test_submit_under_rate_limit(mock_redis, mock_post, client):
+def test_submit_under_rate_limit(mock_redis, mock_post, mock_turnstile, client):
     # Simulate under rate limit: r.get returns "2"
     mock_redis.get.return_value = b"2"
     mock_redis.pipeline.return_value = MagicMock()

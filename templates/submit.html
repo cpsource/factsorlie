@@ -13,6 +13,13 @@
         <label for="statement">Your statement:</label>
         <textarea id="statement" name="statement" rows="4" required></textarea>
 
+        {# TODO: Re-enable once Cloudflare Turnstile widget is configured for factsorlie.com
+        {% if turnstile_site_key %}
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+        {% endif %}
+        #}
+
         <button type="submit">Submit</button>
     </form>
 

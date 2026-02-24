@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import redis
 import requests as http_requests
 import markdown
+from turnstile import verify_turnstile
 
 app = Flask(__name__)
 
@@ -44,10 +45,16 @@ def is_rate_limited(ip, endpoint="default", limit=3, window=60):
 def submit():
     message = None
     analysis = None
+    turnstile_site_key = os.environ.get("CLOUDFLARE_TURNSTYLE_SITE_KEY")
     if request.method == "POST":
+        # TODO: Re-enable Turnstile captcha once Cloudflare widget is configured for factsorlie.com
+        # turnstile_token = request.form.get("cf-turnstile-response")
+        # if not verify_turnstile(turnstile_token, request.remote_addr):
+        #     message = "Bot verification failed. Please try again."
+        #     return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key)
         if is_rate_limited(request.remote_addr, endpoint="submit", limit=3):
             message = "Rate limit exceeded. Please wait a minute before trying again."
-            return render_template("submit.html", message=message, analysis=analysis)
+            return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key)
         statement = request.form.get("statement", "").strip()
         if statement:
             r.lpush("submissions", json.dumps({"statement": statement}))
@@ -58,7 +65,7 @@ def submit():
                 analysis = result
         else:
             message = "Please enter a statement."
-    return render_template("submit.html", message=message, analysis=analysis)
+    return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key)
 
 
 @app.route("/health")
