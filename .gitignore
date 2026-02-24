@@ -12,6 +12,9 @@ apache/ssl/
 apache/httpd-vhosts-active.conf
 .well-known/
 
+# Reference only — not part of the repo
+yt-truth-checker/
+
 # IDE
 .vscode/
 .idea/
