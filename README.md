@@ -47,7 +47,7 @@ With **Deep Search** enabled, the extension first scrapes the video's descriptio
 - Badges appear on thumbnails for previously checked videos
 - No API key needed — all AI calls go through factsorlie.com
 
-See [yt-truth-checker-2/README-install.md](yt-truth-checker-2/README-install.md) for installation and publishing instructions.
+See [yt-truth-checker-2/README-install.md](https://github.com/cpsource/factsorlie/blob/master/yt-truth-checker-2/README-install.md) for installation and publishing instructions.
 
 ## Setup
 
