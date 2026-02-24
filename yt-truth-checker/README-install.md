@@ -1,10 +1,10 @@
-# YT Truth Checker 2 — Installation & Publishing
+# YT Truth Checker — Installation & Publishing
 
 ## Local Installation (Developer Mode)
 
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable **Developer mode** (toggle in the top-right corner)
-3. Click **Load unpacked** and select the `yt-truth-checker-2/` directory
+3. Click **Load unpacked** and select the `yt-truth-checker/` directory
 4. The extension icon should appear in your toolbar
 5. Visit YouTube — hover over any video title for ~1 second to see the truth analysis tooltip
 
@@ -13,11 +13,11 @@ No API key needed — the extension calls `factsorlie.com/query` which handles t
 ## Building a Release Zip
 
 ```bash
-cd yt-truth-checker-2
+cd yt-truth-checker
 make release
 ```
 
-This creates `yt-truth-checker-2-v<VERSION>.zip` ready for upload.
+This creates `yt-truth-checker-v<VERSION>.zip` ready for upload.
 
 To clean up old zips:
 
