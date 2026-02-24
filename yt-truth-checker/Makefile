@@ -4,4 +4,4 @@ release:
 	bash build-release.sh
 
 clean:
-	rm -f yt-truth-checker-2-v*.zip
+	rm -f yt-truth-checker-v*.zip
