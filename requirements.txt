@@ -2,3 +2,4 @@ flask
 redis
 requests
 markdown
+psycopg2-binary

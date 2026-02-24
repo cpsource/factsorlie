@@ -5,6 +5,7 @@ import redis
 import requests as http_requests
 import markdown
 from turnstile import verify_turnstile
+from db import log_query
 
 app = Flask(__name__)
 
@@ -47,11 +48,10 @@ def submit():
     analysis = None
     turnstile_site_key = os.environ.get("CLOUDFLARE_TURNSTYLE_SITE_KEY")
     if request.method == "POST":
-        # TODO: Re-enable Turnstile captcha once Cloudflare widget is configured for factsorlie.com
-        # turnstile_token = request.form.get("cf-turnstile-response")
-        # if not verify_turnstile(turnstile_token, request.remote_addr):
-        #     message = "Bot verification failed. Please try again."
-        #     return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key)
+        turnstile_token = request.form.get("cf-turnstile-response")
+        if not verify_turnstile(turnstile_token, request.remote_addr):
+            message = "Bot verification failed. Please try again."
+            return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key)
         if is_rate_limited(request.remote_addr, endpoint="submit", limit=3):
             message = "Rate limit exceeded. Please wait a minute before trying again."
             return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key)
@@ -63,6 +63,7 @@ def submit():
                 analysis = {"error": error}
             else:
                 analysis = result
+                log_query("submit", statement, json.dumps(analysis))
         else:
             message = "Please enter a statement."
     return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key)
@@ -159,4 +160,5 @@ def query():
         status = 500 if "not configured" in error else 502
         return jsonify({"error": error}), status
 
+    log_query("query", data["title"], json.dumps(result))
     return jsonify(result)
