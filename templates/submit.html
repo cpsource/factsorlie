@@ -3,7 +3,7 @@
 {% block title %}Submit{% endblock %}
 
 {% block content %}
-    <h1>Submit a Fact or a Lie</h1>
+    <h1>Check a Statement</h1>
 
     {% if message %}
         <p class="message">{{ message }}</p>
@@ -13,13 +13,29 @@
         <label for="statement">Your statement:</label>
         <textarea id="statement" name="statement" rows="4" required></textarea>
 
-        <label for="category">Is it a fact or a lie?</label>
-        <select id="category" name="category" required>
-            <option value="" disabled selected>Select one</option>
-            <option value="fact">Fact</option>
-            <option value="lie">Lie</option>
-        </select>
-
         <button type="submit">Submit</button>
     </form>
+
+    {% if analysis %}
+        {% if analysis.error %}
+            <div class="analysis-error">
+                <p>Analysis error: {{ analysis.error }}</p>
+            </div>
+        {% else %}
+            <div class="analysis-result verdict-{{ analysis.verdict|lower }}">
+                <div class="verdict-bar">
+                    <span class="verdict-label">{{ analysis.verdict }}</span>
+                    <span class="confidence">{{ analysis.confidence }} confidence</span>
+                </div>
+                <p class="summary">{{ analysis.summary }}</p>
+                {% if analysis.red_flags %}
+                    <ul class="red-flags">
+                        {% for flag in analysis.red_flags %}
+                            <li>{{ flag }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endif %}
 {% endblock %}

@@ -22,16 +22,19 @@ def index():
 @app.route("/submit", methods=["GET", "POST"])
 def submit():
     message = None
+    analysis = None
     if request.method == "POST":
         statement = request.form.get("statement", "").strip()
-        category = request.form.get("category", "").strip()
-        if statement and category in ("fact", "lie"):
-            entry = json.dumps({"statement": statement, "category": category})
-            r.lpush("submissions", entry)
-            message = "Your submission has been recorded!"
+        if statement:
+            r.lpush("submissions", json.dumps({"statement": statement}))
+            result, error = analyze_statement(statement)
+            if error:
+                analysis = {"error": error}
+            else:
+                analysis = result
         else:
-            message = "Please fill in all fields."
-    return render_template("submit.html", message=message)
+            message = "Please enter a statement."
+    return render_template("submit.html", message=message, analysis=analysis)
 
 
 @app.route("/health")
@@ -60,18 +63,11 @@ Guidelines:
 Focus on the literal claim. Flag emotional manipulation language. Be concise."""
 
 
-@app.route("/query", methods=["POST"])
-def query():
-    data = request.get_json(silent=True)
-    if not data or not data.get("title"):
-        return jsonify({"error": "Missing required field: title"}), 400
-
-    title = data["title"]
-    video_meta = data.get("videoMeta")
-
+def analyze_statement(title, video_meta=None):
+    """Call Anthropic API to analyze a statement/title. Returns (result_dict, error_string)."""
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        return jsonify({"error": "Server API key not configured"}), 500
+        return None, "Server API key not configured"
 
     if video_meta:
         user_content = (
@@ -102,18 +98,31 @@ def query():
         )
         resp.raise_for_status()
     except http_requests.RequestException as e:
-        return jsonify({"error": f"Anthropic API error: {e}"}), 502
+        return None, f"Anthropic API error: {e}"
 
     api_data = resp.json()
     text = "".join(
         b["text"] for b in api_data.get("content", []) if b.get("type") == "text"
     )
 
-    # Strip markdown fences if present
     cleaned = text.replace("```json", "").replace("```", "").strip()
     try:
         result = json.loads(cleaned)
     except json.JSONDecodeError:
-        return jsonify({"error": "Failed to parse API response"}), 502
+        return None, "Failed to parse API response"
+
+    return result, None
+
+
+@app.route("/query", methods=["POST"])
+def query():
+    data = request.get_json(silent=True)
+    if not data or not data.get("title"):
+        return jsonify({"error": "Missing required field: title"}), 400
+
+    result, error = analyze_statement(data["title"], data.get("videoMeta"))
+    if error:
+        status = 500 if "not configured" in error else 502
+        return jsonify({"error": error}), status
 
     return jsonify(result)
