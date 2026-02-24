@@ -4,7 +4,7 @@ A web platform and Chrome extension that uses Claude AI to check whether YouTube
 
 ## Overview
 
-**factsorlie.com** provides a server-side API that analyzes YouTube video titles using Claude AI. The **YT Truth Checker 2** Chrome extension connects to this API — just hover over any YouTube video title for ~1 second and get an instant verdict. No API key required.
+**factsorlie.com** provides a server-side API that analyzes YouTube video titles using Claude AI. The **YT Truth Checker** Chrome extension connects to this API — just hover over any YouTube video title for ~1 second and get an instant verdict. No API key required.
 
 ## Verdicts
 
@@ -21,7 +21,7 @@ A web platform and Chrome extension that uses Claude AI to check whether YouTube
 
 ```
 User hovers on YouTube title
-  → Chrome extension (yt-truth-checker-2) detects hover
+  → Chrome extension (yt-truth-checker) detects hover
     → POSTs title to https://factsorlie.com/query
       → Flask app calls Anthropic API (Claude Sonnet) server-side
       → Returns JSON verdict
@@ -39,7 +39,7 @@ With **Deep Search** enabled, the extension first scrapes the video's descriptio
 - `/query` — POST endpoint for AI truth-checking (accepts `title` and optional `videoMeta`)
 - `/health` — Health check
 
-### Chrome Extension (`yt-truth-checker-2/`)
+### Chrome Extension (`yt-truth-checker/`)
 
 - Hover over any YouTube video title for a tooltip with Claude's analysis
 - Toggle hover detection and Deep Search from the popup
@@ -47,7 +47,7 @@ With **Deep Search** enabled, the extension first scrapes the video's descriptio
 - Badges appear on thumbnails for previously checked videos
 - No API key needed — all AI calls go through factsorlie.com
 
-See [yt-truth-checker-2/README-install.md](https://github.com/cpsource/factsorlie/blob/master/yt-truth-checker-2/README-install.md) for installation and publishing instructions.
+See [yt-truth-checker/README-install.md](https://github.com/cpsource/factsorlie/blob/master/yt-truth-checker/README-install.md) for installation and publishing instructions.
 
 ## Setup
 
@@ -61,7 +61,7 @@ docker-compose up --build -d
 ### Extension
 
 1. Open `chrome://extensions/` and enable **Developer mode**
-2. Click **Load unpacked** and select the `yt-truth-checker-2/` directory
+2. Click **Load unpacked** and select the `yt-truth-checker/` directory
 3. Visit YouTube and hover over video titles
 
 ## Testing
@@ -81,7 +81,7 @@ factsorlie/
 ├── Dockerfile              # Flask container (myproject venv)
 ├── docker-compose.yml      # Flask + Apache + Redis
 ├── templates/              # HTML templates
-├── yt-truth-checker-2/     # Chrome extension (server-side API)
+├── yt-truth-checker/     # Chrome extension (server-side API)
 │   ├── manifest.json
 │   ├── background.js       # Sends requests to factsorlie.com/query
 │   ├── content.js          # Hover detection + tooltip UI
