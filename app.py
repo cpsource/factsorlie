@@ -3,6 +3,7 @@ import json
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import redis
 import requests as http_requests
+import markdown
 
 app = Flask(__name__)
 
@@ -16,7 +17,14 @@ r = redis.Redis(
 def index():
     r.incr("hits")
     count = r.get("hits").decode("utf-8")
-    return render_template("index.html", count=count)
+    readme_html = ""
+    readme_path = os.path.join(os.path.dirname(__file__), "README.md")
+    try:
+        with open(readme_path, "r") as f:
+            readme_html = markdown.markdown(f.read(), extensions=["tables", "fenced_code"])
+    except FileNotFoundError:
+        pass
+    return render_template("index.html", count=count, readme_html=readme_html)
 
 
 @app.route("/submit", methods=["GET", "POST"])
