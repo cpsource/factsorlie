@@ -77,12 +77,11 @@ def test_submit_shows_error_on_api_failure(mock_redis, mock_post, mock_turnstile
     assert b"Analysis error" in response.data
 
 
-# TODO: Re-enable once Cloudflare Turnstile widget is configured for factsorlie.com
-# @patch("app.verify_turnstile", return_value=False)
-# def test_submit_captcha_failure(mock_turnstile, client):
-#     response = client.post("/submit", data={"statement": "The earth is flat"})
-#     assert response.status_code == 200
-#     assert b"Bot verification failed" in response.data
+@patch("app.verify_turnstile", return_value=False)
+def test_submit_captcha_failure(mock_turnstile, client):
+    response = client.post("/submit", data={"statement": "The earth is flat"})
+    assert response.status_code == 200
+    assert b"Bot verification failed" in response.data
 
 
 @patch("app.verify_turnstile", return_value=True)
