@@ -13,9 +13,9 @@ for f in "$SCRIPT_DIR"/test_*.py; do
     docker cp "$f" "$CONTAINER":/app/
 done
 
-# Ensure pytest is installed
-docker exec "$CONTAINER" pip install pytest -q 2>&1 | tail -1
+# Ensure pytest is installed in the myproject venv
+docker exec "$CONTAINER" /app/myproject/bin/pip install pytest -q 2>&1 | tail -1
 
-# Run all tests
+# Run all tests using the myproject venv
 echo "Running tests..."
-docker exec "$CONTAINER" bash -c 'python -m pytest /app/test_*.py -v'
+docker exec "$CONTAINER" bash -c '/app/myproject/bin/python -m pytest /app/test_*.py -v'
