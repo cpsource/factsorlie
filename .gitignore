@@ -12,9 +12,8 @@ apache/ssl/
 apache/httpd-vhosts-active.conf
 .well-known/
 
-# Reference only — not part of the repo
-yt-truth-checker/
-yt-truth-checker-2-v1.0.zip
+# Release zips
+yt-truth-checker-v*.zip
 
 # IDE
 .vscode/
