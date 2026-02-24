@@ -27,11 +27,27 @@ def index():
     return render_template("index.html", count=count, readme_html=readme_html)
 
 
+def is_rate_limited(ip, limit=3, window=60):
+    """Check if IP has exceeded limit requests within window seconds."""
+    key = f"ratelimit:submit:{ip}"
+    count = r.get(key)
+    if count and int(count) >= limit:
+        return True
+    pipe = r.pipeline()
+    pipe.incr(key)
+    pipe.expire(key, window)
+    pipe.execute()
+    return False
+
+
 @app.route("/submit", methods=["GET", "POST"])
 def submit():
     message = None
     analysis = None
     if request.method == "POST":
+        if is_rate_limited(request.remote_addr):
+            message = "Rate limit exceeded. Please wait a minute before trying again."
+            return render_template("submit.html", message=message, analysis=analysis)
         statement = request.form.get("statement", "").strip()
         if statement:
             r.lpush("submissions", json.dumps({"statement": statement}))

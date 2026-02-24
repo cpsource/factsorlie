@@ -72,3 +72,36 @@ def test_submit_shows_error_on_api_failure(mock_redis, mock_post, client):
     response = client.post("/submit", data={"statement": "The earth is flat"})
     assert response.status_code == 200
     assert b"Analysis error" in response.data
+
+
+@patch("app.r")
+def test_submit_rate_limit(mock_redis, client):
+    # Simulate rate limit exceeded: r.get returns "3"
+    mock_redis.get.return_value = b"3"
+
+    response = client.post("/submit", data={"statement": "Test statement"})
+    assert response.status_code == 200
+    assert b"Rate limit exceeded" in response.data
+
+    # Verify no submission was stored and no API call made
+    mock_redis.lpush.assert_not_called()
+
+
+@patch("app.http_requests.post")
+@patch("app.r")
+@patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-ant-test-key"})
+def test_submit_under_rate_limit(mock_redis, mock_post, client):
+    # Simulate under rate limit: r.get returns "2"
+    mock_redis.get.return_value = b"2"
+    mock_redis.pipeline.return_value = MagicMock()
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.raise_for_status = MagicMock()
+    mock_resp.json.return_value = MOCK_ANTHROPIC_RESPONSE
+    mock_post.return_value = mock_resp
+
+    response = client.post("/submit", data={"statement": "The sky is blue"})
+    assert response.status_code == 200
+    assert b"Rate limit exceeded" not in response.data
+    assert b"TRUE" in response.data or b"FALSE" in response.data or b"verdict" in response.data.lower()
