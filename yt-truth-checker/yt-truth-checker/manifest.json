@@ -6,12 +6,20 @@
   "permissions": ["storage"],
   "host_permissions": [
     "https://factsorlie.com/*",
-    "https://www.youtube.com/*"
+    "https://www.youtube.com/*",
+    "https://x.com/*",
+    "https://twitter.com/*"
   ],
   "content_scripts": [
     {
       "matches": ["*://www.youtube.com/*", "*://youtube.com/*"],
       "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://x.com/*", "*://twitter.com/*"],
+      "js": ["x-content.js"],
       "css": ["styles.css"],
       "run_at": "document_idle"
     }
