@@ -47,6 +47,9 @@
                         {% endfor %}
                     </ul>
                 {% endif %}
+                <div class="copy-row">
+                    <button type="button" class="copy-btn" id="copyBtn">Copy</button>
+                </div>
             </div>
         {% endif %}
     {% endif %}
@@ -58,5 +61,25 @@
         document.getElementById('spinner').style.display = 'flex';
         document.getElementById('submitBtn').disabled = true;
     });
+
+    var copyBtn = document.getElementById('copyBtn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function() {
+            var result = document.querySelector('.analysis-result');
+            var verdict = result.querySelector('.verdict-label').textContent;
+            var confidence = result.querySelector('.confidence').textContent;
+            var summary = result.querySelector('.summary').textContent;
+            var flags = result.querySelectorAll('.red-flags li');
+            var text = verdict + ' (' + confidence + ')\n' + summary;
+            if (flags.length) {
+                text += '\nRed flags:\n';
+                flags.forEach(function(li) { text += '- ' + li.textContent + '\n'; });
+            }
+            navigator.clipboard.writeText(text.trim()).then(function() {
+                copyBtn.textContent = 'Copied!';
+                setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
+            });
+        });
+    }
     </script>
 {% endblock %}
