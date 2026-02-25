@@ -1,11 +1,12 @@
 import os
 import json
+import time
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import redis
 import requests as http_requests
 import markdown
 from turnstile import verify_turnstile
-from db import log_query
+from db import log_query, log_error
 
 app = Flask(__name__)
 
@@ -61,6 +62,7 @@ def submit():
             result, error = analyze_statement(statement)
             if error:
                 analysis = {"error": error}
+                log_error("submit", statement, error)
             else:
                 analysis = result
                 log_query("submit", statement, json.dumps(analysis))
@@ -112,25 +114,33 @@ def analyze_statement(title, video_meta=None):
     else:
         user_content = f'Analyze this YouTube video title:\n\n"{title}"'
 
-    try:
-        resp = http_requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={
-                "Content-Type": "application/json",
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-            },
-            json={
-                "model": "claude-sonnet-4-6",
-                "max_tokens": 500,
-                "system": SYSTEM_PROMPT,
-                "messages": [{"role": "user", "content": user_content}],
-            },
-            timeout=30,
-        )
-        resp.raise_for_status()
-    except http_requests.RequestException as e:
-        return None, f"Anthropic API error: {e}"
+    max_retries = 3
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            resp = http_requests.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "Content-Type": "application/json",
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                },
+                json={
+                    "model": "claude-sonnet-4-6",
+                    "max_tokens": 500,
+                    "system": SYSTEM_PROMPT,
+                    "messages": [{"role": "user", "content": user_content}],
+                },
+                timeout=30,
+            )
+            resp.raise_for_status()
+            break
+        except http_requests.RequestException as e:
+            last_error = e
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+            else:
+                return None, f"Anthropic API error: {last_error}"
 
     api_data = resp.json()
     text = "".join(
@@ -157,6 +167,7 @@ def query():
 
     result, error = analyze_statement(data["title"], data.get("videoMeta"))
     if error:
+        log_error("query", data["title"], error)
         status = 500 if "not configured" in error else 502
         return jsonify({"error": error}), status
 

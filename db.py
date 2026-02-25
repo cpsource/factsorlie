@@ -1,4 +1,5 @@
 import gzip
+import json
 import os
 
 import psycopg2
@@ -28,6 +29,28 @@ def log_query(row_src, question, response):
                 cur.execute(
                     "INSERT INTO querys (row_src, question_gz, response_gz) VALUES (%s, %s, %s)",
                     (row_src, question_gz, response_gz),
+                )
+        conn.close()
+    except Exception:
+        pass
+
+
+def log_error(row_src, question, error_msg):
+    """Log an API error to the errors table.
+
+    Silently catches all errors so logging never breaks the main flow.
+    """
+    try:
+        conn = get_conn()
+        if conn is None:
+            return
+        question_gz = gzip.compress(question.encode("utf-8"))
+        error_json = json.dumps({"error": error_msg})
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO errors (row_src, question_gz, error) VALUES (%s, %s, %s)",
+                    (row_src, question_gz, error_json),
                 )
         conn.close()
     except Exception:
