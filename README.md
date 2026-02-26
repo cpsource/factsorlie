@@ -1,10 +1,10 @@
-# Facts or Lie — YouTube Truth Checker
+# Facts or Lie — YouTube & X/Twitter Truth Checker
 
-A web platform and Chrome extension that uses Claude AI to check whether YouTube video headlines are true, false, misleading, or clickbait.
+A web platform and Chrome extension that uses Claude AI to check whether YouTube video headlines and X/Twitter posts are true, false, misleading, or clickbait.
 
 ## Overview
 
-**factsorlie.com** provides a server-side API that analyzes YouTube video titles using Claude AI. The **YT Truth Checker** Chrome extension connects to this API — just hover over any YouTube video title for ~1 second and get an instant verdict. No API key required.
+**factsorlie.com** provides a server-side API that analyzes text using Claude AI. The **YT Truth Checker** Chrome extension connects to this API — just hover over any YouTube video title or X/Twitter tweet for ~1 second and get an instant verdict. No API key required.
 
 ## Verdicts
 
@@ -20,15 +20,15 @@ A web platform and Chrome extension that uses Claude AI to check whether YouTube
 ## Architecture
 
 ```
-User hovers on YouTube title
+User hovers on YouTube title or X/Twitter tweet
   → Chrome extension (yt-truth-checker) detects hover
-    → POSTs title to https://factsorlie.com/query
+    → POSTs text to https://factsorlie.com/query
       → Flask app calls Anthropic API (Claude Sonnet) server-side
       → Returns JSON verdict
     → Extension displays tooltip + badge on thumbnail
 ```
 
-With **Deep Search** enabled, the extension first scrapes the video's description, view count, and upload date from the YouTube page, then sends that metadata along with the title to the server for richer analysis.
+With **Deep Search** enabled (YouTube only), the extension first scrapes the video's description, view count, and upload date from the YouTube page, then sends that metadata along with the title to the server for richer analysis.
 
 ## Components
 
@@ -41,10 +41,11 @@ With **Deep Search** enabled, the extension first scrapes the video's descriptio
 
 ### Chrome Extension (`yt-truth-checker/`)
 
-- Hover over any YouTube video title for a tooltip with Claude's analysis
+- **YouTube**: Hover over any video title for a tooltip with Claude's analysis
+- **X/Twitter**: Hover over any tweet to fact-check its content
 - Toggle hover detection and Deep Search from the popup
 - Results cached per session — re-hovering is instant
-- Badges appear on thumbnails for previously checked videos
+- Badges appear on thumbnails for previously checked videos (YouTube)
 - No API key needed — all AI calls go through factsorlie.com
 
 See [yt-truth-checker/README-install.md](https://github.com/cpsource/factsorlie/blob/master/yt-truth-checker/README-install.md) for installation and publishing instructions.
@@ -61,8 +62,8 @@ docker-compose up --build -d
 ### Extension
 
 1. Open `chrome://extensions/` and enable **Developer mode**
-2. Click **Load unpacked** and select the `yt-truth-checker/` directory
-3. Visit YouTube and hover over video titles
+2. Click **Load unpacked** and select the `yt-truth-checker/yt-truth-checker/` directory
+3. Visit YouTube or X/Twitter and hover over video titles or tweets
 
 ## Testing
 
@@ -84,7 +85,8 @@ factsorlie/
 ├── yt-truth-checker/     # Chrome extension (server-side API)
 │   ├── manifest.json
 │   ├── background.js       # Sends requests to factsorlie.com/query
-│   ├── content.js          # Hover detection + tooltip UI
+│   ├── content.js          # YouTube hover detection + tooltip UI
+│   ├── x-content.js        # X/Twitter hover detection + tooltip UI
 │   ├── popup.html/js       # Settings popup
 │   ├── styles.css          # Tooltip and badge styles
 │   ├── icons/

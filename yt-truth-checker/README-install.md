@@ -4,9 +4,9 @@
 
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable **Developer mode** (toggle in the top-right corner)
-3. Click **Load unpacked** and select the `yt-truth-checker/` directory
+3. Click **Load unpacked** and select the `yt-truth-checker/yt-truth-checker/` directory (the inner directory containing `manifest.json`)
 4. The extension icon should appear in your toolbar
-5. Visit YouTube — hover over any video title for ~1 second to see the truth analysis tooltip
+5. Visit YouTube or X/Twitter — hover over any video title or tweet for ~1 second to see the truth analysis tooltip
 
 No API key needed — the extension calls `factsorlie.com/query` which handles the AI analysis server-side.
 
@@ -41,15 +41,15 @@ make clean
    - Privacy policy URL
 4. Under **Privacy practices**, declare:
    - You communicate with a remote server (factsorlie.com)
-   - The `host_permissions` justification (factsorlie.com for API, youtube.com for content script)
+   - The `host_permissions` justification (factsorlie.com for API, youtube.com and x.com/twitter.com for content scripts)
    - The `storage` permission is used to save user preferences (hover toggle, deep search toggle)
 5. Click **Submit for review**
 
 **Review takes** anywhere from a few hours to a few days. Google checks for malware, policy violations, and manifest correctness.
 
 **Tips before submitting:**
-- Add a privacy policy URL — e.g. "This extension sends YouTube video titles to factsorlie.com for AI-powered truth analysis. No personal data is collected. User preferences are stored locally."
-- Take 2-3 screenshots of the tooltip in action on YouTube
+- Add a privacy policy URL — e.g. "This extension sends YouTube video titles and X/Twitter tweet text to factsorlie.com for AI-powered truth analysis. No personal data is collected. User preferences are stored locally."
+- Take 2-3 screenshots of the tooltip in action on YouTube and X/Twitter
 - Bump the version in `manifest.json` each time you update
 
 ## Extension Settings
