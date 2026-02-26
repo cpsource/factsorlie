@@ -27,7 +27,7 @@ def main():
     with conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT idx, row_src, question_gz, response_gz, created_at FROM querys WHERE idx = %s",
+                "SELECT idx, row_src, question_gz, response_gz, hit_count, created_at FROM querys WHERE idx = %s",
                 (args.idx,),
             )
             row = cur.fetchone()
@@ -37,12 +37,13 @@ def main():
         print(f"No row found with idx={args.idx}")
         sys.exit(1)
 
-    idx, row_src, question_gz, response_gz, created_at = row
+    idx, row_src, question_gz, response_gz, hit_count, created_at = row
     question = gzip.decompress(bytes(question_gz)).decode("utf-8")
     response = gzip.decompress(bytes(response_gz)).decode("utf-8")
 
     print(f"idx:        {idx}")
     print(f"row_src:    {row_src}")
+    print(f"hit_count:  {hit_count}")
     print(f"created_at: {created_at}")
     print(f"question:   {question}")
     print()
