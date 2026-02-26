@@ -154,12 +154,10 @@
   }
 
   // ── API Call ───────────────────────────────────────────────────
-  function checkTitle(title) {
+  function sendMsg(msg) {
     return new Promise(function(resolve, reject) {
-      const msg = { action: 'checkTitle', title: title };
-      chrome.runtime.sendMessage(
-        msg,
-        function(response) {
+      try {
+        chrome.runtime.sendMessage(msg, function(response) {
           if (chrome.runtime.lastError) {
             reject(new Error(chrome.runtime.lastError.message));
           } else if (response && response.success) {
@@ -167,8 +165,21 @@
           } else {
             reject(new Error((response && response.error) || 'Unknown error'));
           }
-        }
-      );
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  function checkTitle(title) {
+    var msg = { action: 'checkTitle', title: title };
+    return sendMsg(msg).catch(function(err) {
+      if (err.message && err.message.includes('Extension context invalidated')) {
+        return Promise.reject(new Error('Extension updated — please refresh the page'));
+      }
+      // Retry once in case service worker was just asleep
+      return sendMsg(msg);
     });
   }
 

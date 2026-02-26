@@ -6,9 +6,10 @@
   "permissions": ["storage"],
   "host_permissions": [
     "https://factsorlie.com/*",
-    "https://www.youtube.com/*",
-    "https://x.com/*",
-    "https://twitter.com/*"
+    "*://www.youtube.com/*",
+    "*://youtube.com/*",
+    "*://x.com/*",
+    "*://twitter.com/*"
   ],
   "content_scripts": [
     {
