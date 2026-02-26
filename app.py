@@ -6,7 +6,7 @@ import redis
 import requests as http_requests
 import markdown
 from turnstile import verify_turnstile
-from db import log_query, log_error
+from db import log_query, log_error, lookup_query
 
 app = Flask(__name__)
 
@@ -59,13 +59,21 @@ def submit():
         statement = request.form.get("statement", "").strip()
         if statement:
             r.lpush("submissions", json.dumps({"statement": statement}))
-            result, error = analyze_statement(statement)
-            if error:
-                analysis = {"error": error}
-                log_error("submit", statement, error)
-            else:
-                analysis = result
-                log_query("submit", statement, json.dumps(analysis))
+            # Check cache before calling AI
+            cached = lookup_query(statement)
+            if cached:
+                try:
+                    analysis = json.loads(cached)
+                except json.JSONDecodeError:
+                    cached = None
+            if not cached:
+                result, error = analyze_statement(statement)
+                if error:
+                    analysis = {"error": error}
+                    log_error("submit", statement, error)
+                else:
+                    analysis = result
+                    log_query("submit", statement, json.dumps(analysis))
         else:
             message = "Please enter a statement."
     return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key)
@@ -164,6 +172,14 @@ def query():
     data = request.get_json(silent=True)
     if not data or not data.get("title"):
         return jsonify({"error": "Missing required field: title"}), 400
+
+    # Check cache before calling AI
+    cached = lookup_query(data["title"])
+    if cached:
+        try:
+            return jsonify(json.loads(cached))
+        except json.JSONDecodeError:
+            pass  # corrupted cache entry, fall through to AI
 
     result, error = analyze_statement(data["title"], data.get("videoMeta"))
     if error:

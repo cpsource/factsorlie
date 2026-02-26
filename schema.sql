@@ -3,6 +3,7 @@ CREATE TABLE querys (
     row_src VARCHAR(10) NOT NULL CHECK (row_src IN ('submit','query')),
     question_gz BYTEA NOT NULL,
     response_gz BYTEA NOT NULL,
+    hit_count INTEGER NOT NULL DEFAULT 1 CHECK (hit_count >= 0),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
