@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(./start.sh:*)"
+      "Bash(./start.sh:*)",
+      "Bash(chmod +x:*)",
+      "WebSearch"
     ]
   }
 }

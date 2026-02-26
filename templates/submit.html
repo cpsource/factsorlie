@@ -75,10 +75,20 @@
                 text += '\nRed flags:\n';
                 flags.forEach(function(li) { text += '- ' + li.textContent + '\n'; });
             }
-            navigator.clipboard.writeText(text.trim()).then(function() {
-                copyBtn.textContent = 'Copied!';
-                setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
-            });
+            text = text.trim();
+
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            var ok = false;
+            try { ok = document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+            copyBtn.textContent = ok ? 'Copied!' : 'Failed';
+            setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
         });
     }
     </script>
