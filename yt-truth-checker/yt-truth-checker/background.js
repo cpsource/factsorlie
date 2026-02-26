@@ -8,7 +8,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (enableDeepSearch && request.videoUrl) {
         videoMeta = await fetchVideoMeta(request.videoUrl).catch(() => null);
       }
-      handleCheck(request.title, videoMeta)
+      const sourceUrl = request.videoUrl || request.sourceUrl || null;
+      handleCheck(request.title, videoMeta, sourceUrl)
         .then(result => sendResponse({ success: true, result: { ...result, _deepSearched: !!videoMeta } }))
         .catch(err => sendResponse({ success: false, error: err.message }));
     });
@@ -43,9 +44,10 @@ async function fetchVideoMeta(videoUrl) {
   return { description, uploadDate, viewCount };
 }
 
-async function handleCheck(title, videoMeta = null) {
+async function handleCheck(title, videoMeta = null, sourceUrl = null) {
   const body = { title };
   if (videoMeta) body.videoMeta = videoMeta;
+  if (sourceUrl) body.sourceUrl = sourceUrl;
 
   const response = await fetch('https://factsorlie.com/query', {
     method: 'POST',

@@ -41,7 +41,7 @@ def lookup_query(question):
         return None
 
 
-def log_query(row_src, question, response):
+def log_query(row_src, question, response, source_url=None):
     """Gzip-compress question and response, then insert into the querys table.
 
     Silently catches all errors so logging never breaks the main flow.
@@ -55,8 +55,8 @@ def log_query(row_src, question, response):
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO querys (row_src, question_gz, response_gz) VALUES (%s, %s, %s)",
-                    (row_src, question_gz, response_gz),
+                    "INSERT INTO querys (row_src, question_gz, response_gz, source_url) VALUES (%s, %s, %s, %s)",
+                    (row_src, question_gz, response_gz, source_url),
                 )
         conn.close()
     except Exception:

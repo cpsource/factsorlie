@@ -189,5 +189,6 @@ def query():
         status = 500 if "not configured" in error else 502
         return jsonify({"error": error}), status
 
-    log_query("query", data["title"], json.dumps(result))
+    source_url = data.get("sourceUrl")
+    log_query("query", data["title"], json.dumps(result), source_url=source_url)
     return jsonify(result)

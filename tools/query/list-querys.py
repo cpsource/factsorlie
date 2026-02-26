@@ -26,7 +26,7 @@ def main():
     with conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT idx, row_src, question_gz, hit_count, created_at FROM querys ORDER BY idx DESC LIMIT %s",
+                "SELECT idx, row_src, question_gz, hit_count, source_url, created_at FROM querys ORDER BY idx DESC LIMIT %s",
                 (args.limit,),
             )
             rows = cur.fetchall()
@@ -36,14 +36,17 @@ def main():
         print("No rows found.")
         return
 
-    print(f"{'idx':<6} {'src':<8} {'hits':<6} {'created_at':<28} {'question'}")
-    print("-" * 86)
-    for idx, row_src, question_gz, hit_count, created_at in rows:
+    print(f"{'idx':<6} {'src':<8} {'hits':<6} {'created_at':<28} {'source_url':<40} {'question'}")
+    print("-" * 130)
+    for idx, row_src, question_gz, hit_count, source_url, created_at in rows:
         question = gzip.decompress(bytes(question_gz)).decode("utf-8")
         # Truncate long questions for display
         if len(question) > 60:
             question = question[:57] + "..."
-        print(f"{idx:<6} {row_src:<8} {hit_count:<6} {str(created_at):<28} {question}")
+        url_display = source_url or ""
+        if len(url_display) > 38:
+            url_display = url_display[:35] + "..."
+        print(f"{idx:<6} {row_src:<8} {hit_count:<6} {str(created_at):<28} {url_display:<40} {question}")
 
 
 if __name__ == "__main__":

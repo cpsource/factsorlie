@@ -192,7 +192,7 @@
 
   function checkTitle(title, videoUrl) {
     const msg = { action: 'checkTitle', title: title };
-    if (settings.deepSearch && videoUrl) msg.videoUrl = videoUrl;
+    if (videoUrl) msg.videoUrl = videoUrl;
     return sendMsg(msg).catch(function(err) {
       if (err.message && err.message.includes('Extension context invalidated')) {
         // Extension was updated/reloaded — prompt user to refresh

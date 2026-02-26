@@ -150,7 +150,11 @@
     var authorEl = article.querySelector('div[data-testid="User-Name"]');
     var author = authorEl ? (authorEl.textContent || '').trim() : '';
 
-    return { text: text, element: tweetTextEl, article: article, author: author };
+    // Extract tweet permalink from status link
+    var statusLink = article.querySelector('a[href*="/status/"]');
+    var tweetUrl = statusLink ? statusLink.href : null;
+
+    return { text: text, element: tweetTextEl, article: article, author: author, url: tweetUrl };
   }
 
   // ── API Call ───────────────────────────────────────────────────
@@ -172,8 +176,9 @@
     });
   }
 
-  function checkTitle(title) {
+  function checkTitle(title, sourceUrl) {
     var msg = { action: 'checkTitle', title: title };
+    if (sourceUrl) msg.sourceUrl = sourceUrl;
     return sendMsg(msg).catch(function(err) {
       if (err.message && err.message.includes('Extension context invalidated')) {
         return Promise.reject(new Error('Extension updated — please refresh the page'));
@@ -209,7 +214,7 @@
 
       showLoading(info.element);
 
-      checkTitle(queryText).then(function(result) {
+      checkTitle(queryText, info.url).then(function(result) {
         cache.set(info.text, result);
         if (currentText === info.text) {
           showResult(result, info.element);
