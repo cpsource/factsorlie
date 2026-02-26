@@ -50,6 +50,9 @@
                 <div class="copy-row">
                     <button type="button" class="copy-btn" id="copyBtn">Copy</button>
                 </div>
+                {% if from_cache %}
+                <p class="cached-flag">Cached result</p>
+                {% endif %}
             </div>
         {% endif %}
     {% endif %}

@@ -168,6 +168,14 @@ form button:hover {
     background: #555;
 }
 
+.cached-flag {
+    text-align: center;
+    padding: 0.25rem 1rem 0.75rem;
+    font-size: 0.8rem;
+    color: #888;
+    font-style: italic;
+}
+
 .analysis-error {
     max-width: 500px;
     margin-top: 1.5rem;

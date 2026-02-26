@@ -23,7 +23,7 @@ def lookup_query(question):
         conn = get_conn()
         if conn is None:
             return None
-        question_gz = gzip.compress(question.encode("utf-8"))
+        question_gz = gzip.compress(question.encode("utf-8"), mtime=0)
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -50,8 +50,8 @@ def log_query(row_src, question, response):
         conn = get_conn()
         if conn is None:
             return
-        question_gz = gzip.compress(question.encode("utf-8"))
-        response_gz = gzip.compress(response.encode("utf-8"))
+        question_gz = gzip.compress(question.encode("utf-8"), mtime=0)
+        response_gz = gzip.compress(response.encode("utf-8"), mtime=0)
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -72,7 +72,7 @@ def log_error(row_src, question, error_msg):
         conn = get_conn()
         if conn is None:
             return
-        question_gz = gzip.compress(question.encode("utf-8"))
+        question_gz = gzip.compress(question.encode("utf-8"), mtime=0)
         error_json = json.dumps({"error": error_msg})
         with conn:
             with conn.cursor() as cur:

@@ -47,6 +47,7 @@ def is_rate_limited(ip, endpoint="default", limit=3, window=60):
 def submit():
     message = None
     analysis = None
+    from_cache = False
     turnstile_site_key = os.environ.get("CLOUDFLARE_TURNSTYLE_SITE_KEY")
     if request.method == "POST":
         turnstile_token = request.form.get("cf-turnstile-response")
@@ -74,9 +75,10 @@ def submit():
                 else:
                     analysis = result
                     log_query("submit", statement, json.dumps(analysis))
+            from_cache = cached is not None
         else:
             message = "Please enter a statement."
-    return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key)
+    return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key, from_cache=from_cache)
 
 
 @app.route("/health")
