@@ -13,11 +13,12 @@ def get_conn():
     return psycopg2.connect(url, sslmode="require")
 
 
-def lookup_query(question):
+def lookup_query(question, source_url=None):
     """Look up a cached response by gzip-compressed question.
 
     Returns the decompressed response string if found, or None.
-    Increments hit_count on a match. Silently returns None on any error.
+    Increments hit_count on a match and updates source_url if provided.
+    Silently returns None on any error.
     """
     try:
         conn = get_conn()
@@ -26,12 +27,21 @@ def lookup_query(question):
         question_gz = gzip.compress(question.encode("utf-8"), mtime=0)
         with conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    "UPDATE querys SET hit_count = hit_count + 1 "
-                    "WHERE question_gz = %s "
-                    "RETURNING response_gz",
-                    (question_gz,),
-                )
+                if source_url:
+                    cur.execute(
+                        "UPDATE querys SET hit_count = hit_count + 1, "
+                        "source_url = COALESCE(source_url, %s) "
+                        "WHERE question_gz = %s "
+                        "RETURNING response_gz",
+                        (source_url, question_gz),
+                    )
+                else:
+                    cur.execute(
+                        "UPDATE querys SET hit_count = hit_count + 1 "
+                        "WHERE question_gz = %s "
+                        "RETURNING response_gz",
+                        (question_gz,),
+                    )
                 row = cur.fetchone()
         conn.close()
         if row:

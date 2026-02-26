@@ -175,8 +175,10 @@ def query():
     if not data or not data.get("title"):
         return jsonify({"error": "Missing required field: title"}), 400
 
+    source_url = data.get("sourceUrl")
+
     # Check cache before calling AI
-    cached = lookup_query(data["title"])
+    cached = lookup_query(data["title"], source_url=source_url)
     if cached:
         try:
             return jsonify(json.loads(cached))
@@ -189,6 +191,5 @@ def query():
         status = 500 if "not configured" in error else 502
         return jsonify({"error": error}), status
 
-    source_url = data.get("sourceUrl")
     log_query("query", data["title"], json.dumps(result), source_url=source_url)
     return jsonify(result)
