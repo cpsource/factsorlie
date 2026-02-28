@@ -5,6 +5,7 @@ CREATE TABLE querys (
     response_gz BYTEA NOT NULL,
     hit_count INTEGER NOT NULL DEFAULT 1 CHECK (hit_count >= 0),
     source_url TEXT DEFAULT NULL,
+    expanded_prompt_gz BYTEA DEFAULT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

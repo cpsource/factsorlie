@@ -27,7 +27,7 @@ def main():
     with conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT idx, row_src, question_gz, response_gz, hit_count, source_url, created_at FROM querys WHERE idx = %s",
+                "SELECT idx, row_src, question_gz, response_gz, hit_count, source_url, expanded_prompt_gz, created_at FROM querys WHERE idx = %s",
                 (args.idx,),
             )
             row = cur.fetchone()
@@ -37,23 +37,42 @@ def main():
         print(f"No row found with idx={args.idx}")
         sys.exit(1)
 
-    idx, row_src, question_gz, response_gz, hit_count, source_url, created_at = row
+    idx, row_src, question_gz, response_gz, hit_count, source_url, expanded_prompt_gz, created_at = row
     question = gzip.decompress(bytes(question_gz)).decode("utf-8")
     response = gzip.decompress(bytes(response_gz)).decode("utf-8")
 
-    print(f"idx:        {idx}")
-    print(f"row_src:    {row_src}")
-    print(f"hit_count:  {hit_count}")
-    print(f"source_url: {source_url or '(none)'}")
-    print(f"created_at: {created_at}")
-    print(f"question:   {question}")
-    print()
-    try:
-        parsed = json.loads(response)
-        print("response:")
-        print(json.dumps(parsed, indent=2))
-    except json.JSONDecodeError:
-        print(f"response:   {response}")
+    def pretty(text):
+        """If text is valid JSON, return it pretty-printed; otherwise return as-is."""
+        try:
+            return json.dumps(json.loads(text), indent=2)
+        except (json.JSONDecodeError, TypeError):
+            return text
+
+    sep = "-" * 60
+
+    print(sep)
+    print(f"  idx:         {idx}")
+    print(f"  row_src:     {row_src}")
+    print(f"  hit_count:   {hit_count}")
+    print(f"  source_url:  {source_url or '(none)'}")
+    print(f"  created_at:  {created_at}")
+    print(sep)
+
+    print("  question_gz (decompressed):")
+    print(pretty(question))
+    print(sep)
+
+    print("  response_gz (decompressed):")
+    print(pretty(response))
+    print(sep)
+
+    print("  expanded_prompt_gz (decompressed):")
+    if expanded_prompt_gz:
+        expanded_prompt = gzip.decompress(bytes(expanded_prompt_gz)).decode("utf-8")
+        print(expanded_prompt)
+    else:
+        print("(not recorded)")
+    print(sep)
 
 
 if __name__ == "__main__":

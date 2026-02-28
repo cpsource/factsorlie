@@ -68,13 +68,14 @@ def submit():
                 except json.JSONDecodeError:
                     cached = None
             if not cached:
-                result, error = analyze_statement(statement)
+                result, error, user_content = analyze_statement(statement)
                 if error:
                     analysis = {"error": error}
                     log_error("submit", statement, error)
                 else:
                     analysis = result
-                    log_query("submit", statement, json.dumps(analysis))
+                    expanded_prompt = f"=== SYSTEM ===\n{SYSTEM_PROMPT}\n\n=== USER ===\n{user_content}"
+                    log_query("submit", statement, json.dumps(analysis), expanded_prompt=expanded_prompt)
             from_cache = cached is not None
         else:
             message = "Please enter a statement."
@@ -86,7 +87,9 @@ def health():
     return {"status": "ok"}
 
 
-SYSTEM_PROMPT = """You are a headline truth-checker. Given a YouTube video title, assess whether the claim in the headline is likely TRUE, FALSE, MISLEADING, CLICKBAIT, or OPINION.
+SYSTEM_PROMPT = """You are a headline truth-checker. Given a YouTube video title (and any additional context such as the video description, view count, channel name, or upload date), assess whether the claim in the headline is likely TRUE, FALSE, MISLEADING, CLICKBAIT, OPINION, or UNVERIFIABLE.
+
+Focus on the literal claim. Flag emotional manipulation language. Be concise.
 
 Respond in this exact JSON format and nothing else:
 {
@@ -97,21 +100,19 @@ Respond in this exact JSON format and nothing else:
 }
 
 Guidelines:
-- CLICKBAIT: headline uses exaggerated language ("DESTROYS", "EXPLOSIVE", "ALL-OUT WAR") to dramatize mundane events
-- MISLEADING: contains a kernel of truth but frames it deceptively
-- FALSE: the core claim is factually wrong
 - TRUE: the core claim is factually accurate
+- FALSE: the core claim is factually wrong
+- MISLEADING: contains a kernel of truth but frames it deceptively
+- CLICKBAIT: headline uses exaggerated language ("DESTROYS", "EXPLOSIVE", "ALL-OUT WAR") to dramatize mundane events
 - OPINION: the headline is expressing a subjective view, not a factual claim
-- UNVERIFIABLE: cannot determine truth from the headline alone
-
-Focus on the literal claim. Flag emotional manipulation language. Be concise."""
+- UNVERIFIABLE: cannot determine truth from the headline alone"""
 
 
 def analyze_statement(title, video_meta=None):
     """Call Anthropic API to analyze a statement/title. Returns (result_dict, error_string)."""
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        return None, "Server API key not configured"
+        return None, "Server API key not configured", None
 
     if video_meta:
         user_content = (
@@ -150,7 +151,7 @@ def analyze_statement(title, video_meta=None):
             if attempt < max_retries - 1:
                 time.sleep(2 ** attempt)
             else:
-                return None, f"Anthropic API error: {last_error}"
+                return None, f"Anthropic API error: {last_error}", user_content
 
     api_data = resp.json()
     text = "".join(
@@ -161,9 +162,9 @@ def analyze_statement(title, video_meta=None):
     try:
         result = json.loads(cleaned)
     except json.JSONDecodeError:
-        return None, "Failed to parse API response"
+        return None, "Failed to parse API response", user_content
 
-    return result, None
+    return result, None, user_content
 
 
 @app.route("/query", methods=["POST"])
@@ -178,18 +179,19 @@ def query():
     source_url = data.get("sourceUrl")
 
     # Check cache before calling AI
-    cached = lookup_query(data["title"], source_url=source_url)
+    cached = lookup_query(json.dumps(data), source_url=source_url)
     if cached:
         try:
             return jsonify(json.loads(cached))
         except json.JSONDecodeError:
             pass  # corrupted cache entry, fall through to AI
 
-    result, error = analyze_statement(data["title"], data.get("videoMeta"))
+    result, error, user_content = analyze_statement(data["title"], data.get("videoMeta"))
     if error:
-        log_error("query", data["title"], error)
+        log_error("query", json.dumps(data), error)
         status = 500 if "not configured" in error else 502
         return jsonify({"error": error}), status
 
-    log_query("query", data["title"], json.dumps(result), source_url=source_url)
+    expanded_prompt = f"=== SYSTEM ===\n{SYSTEM_PROMPT}\n\n=== USER ===\n{user_content}"
+    log_query("query", json.dumps(data), json.dumps(result), source_url=source_url, expanded_prompt=expanded_prompt)
     return jsonify(result)
