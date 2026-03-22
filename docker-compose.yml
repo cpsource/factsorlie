@@ -2,6 +2,7 @@ services:
   flask:
     build: .
     container_name: flask-app
+    restart: unless-stopped
     ports:
       - "5000:5000"
     depends_on:
@@ -17,6 +18,7 @@ services:
   apache:
     build: ./apache
     container_name: apache
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
@@ -24,11 +26,13 @@ services:
       - ./apache/httpd-vhosts-active.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
       - /home/ubuntu/factsorlie/.well-known:/usr/local/apache2/htdocs/.well-known
       - /etc/letsencrypt:/etc/letsencrypt
+      - /etc/ssl/openssl.cnf:/etc/ssl/openssl.cnf:ro
     depends_on:
       - flask
 
   redis:
     image: redis:7-alpine
     container_name: redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
