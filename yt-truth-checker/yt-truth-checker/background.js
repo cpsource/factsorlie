@@ -3,16 +3,27 @@
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'checkTitle') {
-    chrome.storage.local.get(['enableDeepSearch'], async ({ enableDeepSearch }) => {
-      let videoMeta = null;
-      if (enableDeepSearch && request.videoUrl) {
-        videoMeta = await fetchVideoMeta(request.videoUrl).catch(() => null);
+    console.log('[YTTruth2-BG] Received checkTitle:', request.title?.substring(0, 50));
+    (async () => {
+      try {
+        const { enableDeepSearch } = await chrome.storage.local.get(['enableDeepSearch']);
+        console.log('[YTTruth2-BG] deepSearch:', !!enableDeepSearch, '| videoUrl:', request.videoUrl?.substring(0, 60));
+        let videoMeta = null;
+        if (enableDeepSearch && request.videoUrl) {
+          console.log('[YTTruth2-BG] Fetching video metadata...');
+          videoMeta = await fetchVideoMeta(request.videoUrl).catch(() => null);
+          console.log('[YTTruth2-BG] videoMeta:', videoMeta ? 'found' : 'null');
+        }
+        const sourceUrl = request.videoUrl || request.sourceUrl || null;
+        console.log('[YTTruth2-BG] Calling handleCheck -> factsorlie.com/query');
+        const result = await handleCheck(request.title, videoMeta, sourceUrl);
+        console.log('[YTTruth2-BG] Result:', result.verdict, '(' + result.confidence + ')');
+        sendResponse({ success: true, result: { ...result, _deepSearched: !!videoMeta } });
+      } catch (err) {
+        console.error('[YTTruth2-BG] Error:', err.message);
+        sendResponse({ success: false, error: err.message });
       }
-      const sourceUrl = request.videoUrl || request.sourceUrl || null;
-      handleCheck(request.title, videoMeta, sourceUrl)
-        .then(result => sendResponse({ success: true, result: { ...result, _deepSearched: !!videoMeta } }))
-        .catch(err => sendResponse({ success: false, error: err.message }));
-    });
+    })();
     return true; // keep channel open for async
   }
 });

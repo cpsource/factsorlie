@@ -134,28 +134,50 @@
   }
 
   // ── Find title from any element ────────────────────────────────
+  // Find video info using elementsFromPoint to pierce Shadow DOM
+  function findTitleFromPoint(x, y) {
+    var els = document.elementsFromPoint(x, y);
+    var renderer = null;
+    for (var i = 0; i < els.length; i++) {
+      var tag = els[i].tagName;
+      if (tag === 'YTD-RICH-ITEM-RENDERER' || tag === 'YTD-VIDEO-RENDERER' ||
+          tag === 'YTD-COMPACT-VIDEO-RENDERER' || tag === 'YTD-GRID-VIDEO-RENDERER' ||
+          tag === 'YTD-RICH-GRID-MEDIA') {
+        renderer = els[i];
+        break;
+      }
+    }
+    if (!renderer) return null;
+
+    var titleLink = renderer.querySelector('a.ytLockupMetadataViewModelTitle') ||
+                    renderer.querySelector('a#video-title-link') ||
+                    renderer.querySelector('a#video-title') ||
+                    renderer.querySelector('a.yt-lockup-metadata-view-model__title');
+
+    if (!titleLink) return null;
+
+    var text = (titleLink.textContent || '').trim();
+    if (text.length < 10) return null;
+
+    console.log('[YTTruth2] Found title via elementsFromPoint:', text.substring(0, 50));
+    return { text: text, element: titleLink, renderer: renderer, url: titleLink.href };
+  }
+
+  // Legacy closest()-based lookup (for direct title hovers)
   function findTitleInfo(el) {
     if (!el || !el.closest) return null;
 
-    // Strategy 1: New YouTube DOM — a.yt-lockup-metadata-view-model__title
-    var titleLink = el.closest('a.yt-lockup-metadata-view-model__title');
+    var titleLink = el.closest('a.ytLockupMetadataViewModelTitle') ||
+                    el.closest('a#video-title-link') ||
+                    el.closest('a#video-title');
 
-    // Strategy 2: Legacy — a#video-title or #video-title
-    if (!titleLink) titleLink = el.closest('a#video-title');
-    if (!titleLink) titleLink = el.closest('#video-title-link');
-
-    // Strategy 3: span inside a title link
     if (!titleLink) {
-      var span = el.closest('span.yt-core-attributed-string');
-      if (span) {
-        titleLink = span.closest('a.yt-lockup-metadata-view-model__title') ||
-                    span.closest('a#video-title');
-      }
+      var span = el.closest('span.ytAttributedStringHost');
+      if (span) titleLink = span.closest('a.ytLockupMetadataViewModelTitle');
     }
 
-    // Strategy 4: el itself is #video-title
     if (!titleLink && el.id === 'video-title') {
-      titleLink = el;
+      titleLink = el.closest('a#video-title-link') || el;
     }
 
     if (!titleLink) return null;
@@ -168,6 +190,7 @@
     var text = (titleLink.textContent || '').trim();
     if (text.length < 10) return null;
 
+    console.log('[YTTruth2] Found title via closest():', text.substring(0, 50));
     return { text: text, element: titleLink, renderer: renderer, url: titleLink.href };
   }
 
@@ -216,10 +239,12 @@
   }
 
   // ── Event Handling ─────────────────────────────────────────────
+  // NOTE: Must use capture phase (true) — YouTube calls stopPropagation() in bubble phase
   document.addEventListener('mouseover', function(e) {
     if (!settings.enableHover) return;
 
-    var info = findTitleInfo(e.target);
+    // Try closest() first (fast), fall back to elementsFromPoint (pierces Shadow DOM)
+    var info = findTitleInfo(e.target) || findTitleFromPoint(e.clientX, e.clientY);
     if (!info) return;
 
     if (info.text === currentTitle) return;
@@ -228,17 +253,22 @@
     hoverTimer = setTimeout(function() {
       currentTitle = info.text;
       console.log('[YTTruth2] Hover detected:', info.text.substring(0, 60));
+      console.log('[YTTruth2]   URL:', info.url);
+      console.log('[YTTruth2]   renderer:', info.renderer ? info.renderer.tagName : 'none');
 
       if (cache.has(info.text)) {
+        console.log('[YTTruth2]   -> cache hit');
         var cached = cache.get(info.text);
         showResult(cached, info.element);
         addBadge(info.renderer, cached.verdict);
         return;
       }
 
+      console.log('[YTTruth2]   -> sending to background for API check...');
       showLoading(info.element);
 
       checkTitle(info.text, info.url).then(function(result) {
+        console.log('[YTTruth2]   -> result:', result.verdict, '(' + result.confidence + ')');
         cache.set(info.text, result);
         if (currentTitle === info.text) {
           showResult(result, info.element);
@@ -251,13 +281,13 @@
         }
       });
     }, 800);
-  });
+  }, true); // capture phase — YouTube stops propagation in bubble phase
 
   document.addEventListener('mouseover', function(e) {
     if (tooltip && tooltip.contains(e.target)) {
       cancelHide();
     }
-  });
+  }, true);
 
   document.addEventListener('mouseout', function(e) {
     if (tooltip && tooltip.contains(e.target) && !tooltip.contains(e.relatedTarget)) {
@@ -272,7 +302,7 @@
       clearTimeout(hoverTimer);
       scheduleHide();
     }
-  });
+  }, true);
 
   window.addEventListener('scroll', function() {
     clearTimeout(hoverTimer);
