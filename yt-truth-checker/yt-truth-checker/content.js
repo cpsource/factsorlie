@@ -102,9 +102,11 @@
   function scheduleHide() {
     clearTimeout(hideTimer);
     hideTimer = setTimeout(function() {
+      // Don't hide if mouse is currently over the tooltip
+      if (tooltip && tooltip.matches(':hover')) return;
       hideTooltip();
       currentTitle = null;
-    }, 300);
+    }, 1000);
   }
 
   function cancelHide() {
