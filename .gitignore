@@ -9,7 +9,6 @@ venv/
 
 # SSL certificates
 apache/ssl/
-apache/httpd-vhosts-active.conf
 .well-known/
 
 # Release zips
