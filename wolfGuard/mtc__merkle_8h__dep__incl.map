@@ -1,0 +1,16 @@
+<map id="mtc_merkle.h" name="mtc_merkle.h">
+<area shape="rect" id="Node000001" title="Merkle tree for the MTC CA server (RFC 9162)." alt="" coords="69,5,181,31"/>
+<area shape="rect" id="Node000002" href="$mtc__merkle_8c.html" title=" " alt="" coords="5,79,116,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,43,73,80,69,77,103,39"/>
+<area shape="rect" id="Node000003" href="$mtc__store_8h.html" title="Persistence and CA operations for the MTC CA server." alt="" coords="141,79,239,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="147,39,181,77,177,80,143,43"/>
+<area shape="rect" id="Node000004" href="$mtc__http_8h.html" title="Minimal HTTP&#45;over&#45;TLS server for the MTC CA/Log." alt="" coords="60,152,152,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="168,115,121,154,118,150,164,111"/>
+<area shape="rect" id="Node000006" href="$mtc__server_8c.html" title=" " alt="" coords="137,225,243,251"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="193,118,193,225,187,225,187,118"/>
+<area shape="rect" id="Node000007" href="$mtc__store_8c.html" title=" " alt="" coords="227,152,326,177"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="216,110,264,150,261,154,213,115"/>
+<area shape="rect" id="Node000005" href="$mtc__http_8c.html" title=" " alt="" coords="22,225,113,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="95,191,76,226,71,224,91,188"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="132,184,178,223,175,227,128,188"/>
+</map>

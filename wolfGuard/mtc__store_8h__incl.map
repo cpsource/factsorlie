@@ -1,0 +1,15 @@
+<map id="mtc_store.h" name="mtc_store.h">
+<area shape="rect" id="Node000001" title="Persistence and CA operations for the MTC CA server." alt="" coords="133,5,232,31"/>
+<area shape="rect" id="Node000002" href="$mtc__merkle_8h.html" title="Merkle tree for the MTC CA server (RFC 9162)." alt="" coords="5,79,117,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,33,94,74,91,69,162,28"/>
+<area shape="rect" id="Node000004" href="$mtc__db_8h.html" title="PostgreSQL (Neon) persistence layer for the MTC CA server." alt="" coords="141,79,224,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,31,185,65,180,65,180,31"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="229,152,333,177"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="197,29,238,77,273,138,268,141,234,80,193,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="26,152,97,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="64,104,64,138,59,138,59,104"/>
+<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="165,106,94,147,91,143,162,102"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="121,152,205,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="182,105,172,140,167,138,177,104"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="200,102,256,142,253,146,197,106"/>
+</map>

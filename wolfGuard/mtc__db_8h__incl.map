@@ -1,0 +1,9 @@
+<map id="mtc_db.h" name="mtc_db.h">
+<area shape="rect" id="Node000001" title="PostgreSQL (Neon) persistence layer for the MTC CA server." alt="" coords="125,5,207,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,89,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,33,80,74,77,69,146,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="114,79,218,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,31,169,65,163,65,163,31"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="243,79,313,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,28,249,69,246,73,183,33"/>
+</map>
