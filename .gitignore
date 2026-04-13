@@ -22,3 +22,6 @@ yt-truth-checker-v*.zip
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated docs
+wolfGuard/

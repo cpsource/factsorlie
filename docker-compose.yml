@@ -25,6 +25,7 @@ services:
     volumes:
       - ./apache/httpd-vhosts-active.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
       - /home/ubuntu/factsorlie/.well-known:/usr/local/apache2/htdocs/.well-known
+      - /home/ubuntu/factsorlie/wolfGuard:/usr/local/apache2/htdocs/wolfGuard:ro
       - /etc/letsencrypt:/etc/letsencrypt
       - /etc/ssl/openssl.cnf:/etc/ssl/openssl.cnf:ro
     depends_on:
