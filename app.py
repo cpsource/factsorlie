@@ -82,6 +82,18 @@ def submit():
     return render_template("submit.html", message=message, analysis=analysis, turnstile_site_key=turnstile_site_key, from_cache=from_cache)
 
 
+@app.route("/wolfguard")
+def wolfguard():
+    wolfguard_html = ""
+    wolfguard_path = os.path.join(os.path.dirname(__file__), "README-wolfGuard.md")
+    try:
+        with open(wolfguard_path, "r") as f:
+            wolfguard_html = markdown.markdown(f.read(), extensions=["tables", "fenced_code"])
+    except FileNotFoundError:
+        wolfguard_html = "<p>wolfGuard documentation not found.</p>"
+    return render_template("wolfguard.html", wolfguard_html=wolfguard_html)
+
+
 @app.route("/health")
 def health():
     return {"status": "ok"}

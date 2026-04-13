@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}wolfGuard{% endblock %}
+
+{% block content %}
+    <div class="readme-content">
+        {{ wolfguard_html|safe }}
+    </div>
+    <p style="margin-top: 2em;">
+        <a href="/wolfGuard/index.html">View API Documentation (Doxygen)</a>
+    </p>
+{% endblock %}
