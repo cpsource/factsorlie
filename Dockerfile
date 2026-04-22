@@ -2,13 +2,11 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN python -m venv /app/myproject \
-    && /app/myproject/bin/pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt /tmp/requirements.txt
+RUN python -m venv /opt/venv \
+    && /opt/venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt
 
-COPY . .
-
-ENV PATH="/app/myproject/bin:$PATH"
+ENV PATH="/opt/venv/bin:$PATH"
 
 EXPOSE 5000
 

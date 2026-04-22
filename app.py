@@ -21,7 +21,7 @@ def index():
     r.incr("hits")
     count = r.get("hits").decode("utf-8")
     readme_html = ""
-    readme_path = os.path.join(os.path.dirname(__file__), "README.md")
+    readme_path = "/postWolf/README.md"
     try:
         with open(readme_path, "r") as f:
             readme_html = markdown.markdown(f.read(), extensions=["tables", "fenced_code"])
