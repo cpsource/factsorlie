@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YT Truth Checker 2",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Hover over YouTube video titles to get an AI-powered truth/fiction analysis via factsorlie.com.",
   "permissions": ["storage"],
   "host_permissions": [
